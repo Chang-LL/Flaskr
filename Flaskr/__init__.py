@@ -2,24 +2,32 @@
 This script runs the application using a development server.
 It contains the definition of routes and views for the application.
 """
+import os
 
 from flask import Flask
-app = Flask(__name__)
+def create_app(test_config=None):
+    """factory function"""
+    #create and configure the app
+    app=Flask(__name__,instance_relative_config=True)
+    app.config.from_mapping(
+        SECRET_KEY='dev',
+        DATEBASE=os.path.join(app.instance_path,'Flaskr.sqlite'),
+        )
+    if test_config is None:
+        # load the instance config, if it exists, when not testing
+        app.config.from_pyfile('config.py',silent=True)
+    else:
+        # load the test config if passed in
+        app.config.from_mapping(test_config)
 
-# Make the WSGI interface available at the top level so wfastcgi can get it.
-wsgi_app = app.wsgi_app
-
-
-@app.route('/')
-def hello():
-    """Renders a sample page."""
-    return "Hello World!"
-
-if __name__ == '__main__':
-    import os
-    HOST = os.environ.get('SERVER_HOST', 'localhost')
+    # ensure the instance folder exists
     try:
-        PORT = int(os.environ.get('SERVER_PORT', '5555'))
-    except ValueError:
-        PORT = 5555
-    app.run(HOST, PORT)
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
+
+    # a simple page that says hello
+    @app.route('/hello')
+    def hello():
+        return 'Hello World!'
+    return app
