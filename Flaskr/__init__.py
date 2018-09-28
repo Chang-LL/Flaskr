@@ -31,9 +31,4 @@ def create_app(test_config=None):
     db.init_app(app)
     from Flaskr import auth
     app.register_blueprint(auth.bp)
-    #for index 
-    #TODO
-    #@app.route('/index')
-    #def index():
-    #    return "test index"
     return app
